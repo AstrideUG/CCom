@@ -1,14 +1,10 @@
 package me.helight.ccom.concurrency.chain.objectives;
 
-import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import me.helight.ccom.concurrency.Chain;
 import me.helight.ccom.concurrency.chain.ChainObjective;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
-import java.util.function.Supplier;
 
 public class ParallelObjective extends ChainObjective {
 
@@ -36,10 +32,9 @@ public class ParallelObjective extends ChainObjective {
 
         try {
             latch.await();
+            finish(returns);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        finish(returns);
     }
 }

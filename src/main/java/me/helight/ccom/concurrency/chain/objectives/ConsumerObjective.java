@@ -1,17 +1,16 @@
 package me.helight.ccom.concurrency.chain.objectives;
 
-import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import me.helight.ccom.concurrency.chain.ChainObjective;
+import me.helight.ccom.concurrency.chain.EnvAdrr;
 
-import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 public class ConsumerObjective extends ChainObjective {
 
     private Consumer consumer;
 
-    public ConsumerObjective(Consumer consumer, Integer... envs) {
+    public ConsumerObjective(Consumer consumer, EnvAdrr... envs) {
         this.consumer = consumer;
         this.envAddrs = envs;
     }
