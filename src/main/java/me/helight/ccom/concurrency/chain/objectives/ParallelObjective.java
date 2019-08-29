@@ -21,9 +21,9 @@ public class ParallelObjective extends ChainObjective {
         CountDownLatch latch = new CountDownLatch(chains.length);
         for (int i = 0; i < chains.length; i++) {
             int finalI = i;
-            Chain c = chains[i];
-            c.parent = chain;
             new Thread(() -> {
+                Chain c = chains[finalI];
+                c.parent = chain;
                 c.run();
                 returns[finalI] = c.environment;
                 latch.countDown();

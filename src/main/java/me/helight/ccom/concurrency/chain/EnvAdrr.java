@@ -4,7 +4,6 @@ import lombok.Data;
 import me.helight.ccom.concurrency.Chain;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Map;
 
 @Data
@@ -27,7 +26,6 @@ public class EnvAdrr {
                 if (map.containsKey(toKey())) {
                     return map.get(toKey());
                 }
-                System.out.println(map.toString());
             }
             return null;
         }
@@ -64,9 +62,11 @@ public class EnvAdrr {
         return envAdrr;
     }
 
-    public static Map<String,Object> getHighestMap(Chain chain) {
-        ArrayList<Map<String,Object>> arrayList = getEnvStack(chain);
-        Collections.shuffle(arrayList);
-        return arrayList.get(0);
+    public static Chain getHighestChain(Chain chain) {
+        Chain current = chain;
+        while (current.parent != null) {
+            current = current.parent;
+        }
+        return current;
     }
 }

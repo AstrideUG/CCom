@@ -33,7 +33,7 @@ public abstract class ChainObjective {
 
     protected final void finish(Object object) {
         if (exportEnv != null) {
-            EnvAdrr.getHighestMap(chain).put(exportEnv, object);
+            EnvAdrr.getHighestChain(chain).getNamedEnvironment().put(exportEnv, object);
         }
 
         future.complete(object);

@@ -19,10 +19,10 @@ class ChainTest {
     void test() {
         AtomicBoolean runnableCalled = new AtomicBoolean(false);
         long duration = Chain.create()
-                .sleep(100)
+                .sleep(50)
                 .addObjective(new SupplierObjective(() -> 10).exportNamed("mult"))
                 .addObjective(new FunctionObjective(a -> (int)((List)a).get(0) * (int)((List)a).get(1), EnvAdrr.from(1), EnvAdrr.from("mult")))
-                .sleep(100)
+                .sleep(50)
                 .addObjective(new RunnableObjective(() -> {
                     runnableCalled.set(true);
                 }))
@@ -31,12 +31,25 @@ class ChainTest {
                 .run();
 
         assertTrue(runnableCalled.get());
-        assertTrue(duration >= 200);
+        assertTrue(duration >= 100);
     }
 
+    /**
+     * Sometimes the assert for c = 50 fails for unknown reasons. However after changes
+     * which dont even have to affect the value, it normally works great again
+     *
+     * If you find a error, which could be responsible for this error, tell me ^^
+     */
     @Test
     void testParallel() {
-        Chain supplyChain = Chain.create().addObjective(new SupplierObjective(() -> 50).exportNamed("val"));
+        Chain supplyChain = Chain.create().addObjective(new SupplierObjective(() -> {
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return 50;
+        }).exportNamed("val"));
         supplyChain.run();
         assertEquals(supplyChain.environment[0], 50);
         Chain.create()
