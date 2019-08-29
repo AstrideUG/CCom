@@ -1,15 +1,18 @@
 package me.helight.ccom.concurrency;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
 import me.helight.ccom.concurrency.chain.ChainObjective;
-import me.helight.ccom.concurrency.chain.objectives.SleepObjective;
+import me.helight.ccom.concurrency.chain.objectives.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class Chain {
 
@@ -17,13 +20,44 @@ public class Chain {
 
     public Object[] environment;
 
+    public Chain parent;
+
     public Chain addObjective(ChainObjective objective) {
         objectives.add(objective);
         return this;
     }
 
+    /**
+     * Shortcut for adding a {@link SleepObjective} to the ChainCall
+     */
     public Chain sleep(long millis) {
         objectives.add(new SleepObjective(millis));
+        return this;
+    }
+
+    public Chain supply(Supplier supplier) {
+        objectives.add(new SupplierObjective(supplier));
+        return this;
+    }
+
+    public Chain consume(Consumer consumer, Integer... environmentAdresses) {
+        objectives.add(new ConsumerObjective(consumer, environmentAdresses));
+        return this;
+    }
+
+    public Chain function(Function function, Integer... environmentAdresses) {
+        objectives.add(new FunctionObjective(function,environmentAdresses));
+        return this;
+    }
+
+    public Chain chain(Chain chain) {
+        objectives.add(new ChainedObjective(chain));
+        return this;
+    }
+
+
+    public Chain parallel(Chain... chains) {
+        objectives.add(new ParallelObjective(chains));
         return this;
     }
 
@@ -57,5 +91,6 @@ public class Chain {
     public static Chain create() {
         return new Chain();
     }
+
 
 }

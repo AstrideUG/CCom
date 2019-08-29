@@ -12,7 +12,7 @@ import java.util.concurrent.Future;
 @RequiredArgsConstructor
 public abstract class ChainObjective {
 
-    protected Chain chain;
+    public Chain chain;
 
     protected Integer[] envAddrs;
 
