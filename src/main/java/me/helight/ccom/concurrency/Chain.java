@@ -40,6 +40,16 @@ public class Chain {
         return this;
     }
 
+    public Chain runnable(Runnable runnable) {
+        objectives.add(new RunnableObjective(runnable));
+        return this;
+    }
+
+    public Chain futur(Future future) {
+        objectives.add(new FutureObjective(future));
+        return this;
+    }
+
     public Chain consume(Consumer consumer, Integer... environmentAdresses) {
         objectives.add(new ConsumerObjective(consumer, environmentAdresses));
         return this;
