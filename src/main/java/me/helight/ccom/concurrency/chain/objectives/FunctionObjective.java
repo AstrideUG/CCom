@@ -1,11 +1,11 @@
 package me.helight.ccom.concurrency.chain.objectives;
 
 import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
+import me.helight.ccom.concurrency.Environment;
 import me.helight.ccom.concurrency.chain.ChainObjective;
 import me.helight.ccom.concurrency.chain.EnvAdrr;
 
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 @AllArgsConstructor
@@ -19,8 +19,7 @@ public class FunctionObjective extends ChainObjective {
     }
 
     @Override
-    @SneakyThrows
-    public void run() {
-        finish(function.apply(compressEnv()));
+    public void run(CompletableFuture<Object> future, Environment env) {
+        future.complete(function.apply(env.resolve(envAddrs)));
     }
 }

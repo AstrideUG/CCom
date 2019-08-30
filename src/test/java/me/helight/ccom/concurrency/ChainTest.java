@@ -1,5 +1,7 @@
 package me.helight.ccom.concurrency;
 
+import lombok.SneakyThrows;
+import me.helight.ccom.concurrency.chain.ChainResult;
 import me.helight.ccom.concurrency.chain.EnvAdrr;
 import me.helight.ccom.concurrency.chain.objectives.ConsumerObjective;
 import me.helight.ccom.concurrency.chain.objectives.FunctionObjective;
@@ -7,9 +9,10 @@ import me.helight.ccom.concurrency.chain.objectives.RunnableObjective;
 import me.helight.ccom.concurrency.chain.objectives.SupplierObjective;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,53 +23,88 @@ class ChainTest {
     void test() {
         AtomicBoolean runnableCalled = new AtomicBoolean(false);
 
-        HashMap<String,Object> map = new HashMap<>();
-        map.put("mult", 10);
+        int xRandom = ThreadLocalRandom.current().nextInt();
+        int yRandom = ThreadLocalRandom.current().nextInt();
 
-        long duration = Chain.create()
+        Environment map = new Environment();
+        map.put("mult", yRandom);
+        map.put("org", xRandom);
+
+        ChainResult result = Chain.create()
                 .sleep(50)
-                .addObjective(new SupplierObjective(() -> 10))
-                .addObjective(new FunctionObjective(a -> (int)((List)a).get(0) * (int)((List)a).get(1), EnvAdrr.from(1), EnvAdrr.from("mult")))
+                .addObjective(new SupplierObjective(() -> xRandom))
+                .addObjective(new FunctionObjective(a -> (int)((List)a).get(0) * (int)((List)a).get(1), EnvAdrr.from("org"), EnvAdrr.from("mult")).exportNamed("result"))
                 .sleep(50)
                 .addObjective(new RunnableObjective(() -> {
                     runnableCalled.set(true);
                 }))
-                .addObjective(new ConsumerObjective(x -> assertEquals(10, x), EnvAdrr.from(1)))
-                .addObjective(new ConsumerObjective(x -> assertEquals(100, (int)x), EnvAdrr.from(2)))
+                .addObjective(new ConsumerObjective(x -> assertEquals(xRandom, x), EnvAdrr.from("org")))
+                .addObjective(new ConsumerObjective(x -> assertEquals(xRandom * yRandom, (int)x), EnvAdrr.from("result")))
                 .run(map);
 
         assertTrue(runnableCalled.get());
-        assertTrue(duration >= 100);
+        assertTrue(result.getDuration() >= 100);
     }
 
-    /**
-     * Sometimes the assert for c = 50 fails for unknown reasons. However after changes
-     * which dont even have to affect the value, it normally works great again
-     *
-     * If you find a error, which could be responsible for this error, tell me ^^
-     */
+    @Test
+    @SneakyThrows
+    void testReset() {
+        Chain chain = Chain.create()
+                .chain(Chain.create().addObjective(new FunctionObjective(p -> {
+                    assertNotNull(p);
+                    return p;
+                }, EnvAdrr.from("origin")).exportNamed("uno")))
+                .addObjective(new FunctionObjective(s -> {
+                    List<Integer> ints = (List<Integer>)s;
+                    return ints.get(0) * ints.get(1);
+                }, EnvAdrr.from("uno"), EnvAdrr.from("mult")).exportNamed("result"));
+
+        assertNotNull(chain);
+
+        CountDownLatch countDownLatch = new CountDownLatch(20);
+        for (int i = 0; i < 20; i++) {
+            new Thread(() -> {
+                try {
+                    Environment env = new Environment();
+                    int org = ThreadLocalRandom.current().nextInt();
+                    int mult = ThreadLocalRandom.current().nextInt();
+                    System.out.println("Numbers are: " + org + "," + mult);
+                    env.put("origin", org);
+                    env.put("mult", mult);
+                    env.put("#" + ThreadLocalRandom.current().nextInt(), ThreadLocalRandom.current().nextInt());
+
+                    ChainResult chainResult = chain.runAsync(env).get();
+                    assertEquals(org * mult, chainResult.getEnvironment().get("result"));
+                    assertEquals(5, chainResult.getEnvironment().size());
+                    System.out.println("Assert successful");
+                    countDownLatch.countDown();
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        }
+
+        countDownLatch.await();
+
+    }
+
     @Test
     void testParallel() {
+        int i = ThreadLocalRandom.current().nextInt();
+
         Chain supplyChain = Chain.create().addObjective(new SupplierObjective(() -> {
             try {
                 Thread.sleep(50);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            return 50;
+            return i;
         }).exportNamed("val"));
-        supplyChain.run(new HashMap<>());
-        assertEquals(supplyChain.environment[0], 50);
+        ChainResult firstResult = supplyChain.run(new Environment());
+        assertEquals(firstResult.getEnvironment().get("val"), i);
         Chain.create()
                 .parallel(supplyChain)
-                .consume(b -> {
-                    System.out.println(b.toString());
-                    Object a = ((ArrayList)b).get(0);
-                    Object c = ((ArrayList)b).get(1);
-                    Object[][] env = (Object[][]) a;
-                    assertEquals(50, env[0][0]);
-                    assertEquals(50, c);
-                }, EnvAdrr.from(0), EnvAdrr.from("val")).run(new HashMap<>());
+                .consume(b -> assertEquals(i, b), EnvAdrr.from("val")).run(new Environment());
 
     }
 

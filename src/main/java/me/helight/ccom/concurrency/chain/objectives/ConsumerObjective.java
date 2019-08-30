@@ -1,9 +1,10 @@
 package me.helight.ccom.concurrency.chain.objectives;
 
-import lombok.SneakyThrows;
+import me.helight.ccom.concurrency.Environment;
 import me.helight.ccom.concurrency.chain.ChainObjective;
 import me.helight.ccom.concurrency.chain.EnvAdrr;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public class ConsumerObjective extends ChainObjective {
@@ -16,9 +17,8 @@ public class ConsumerObjective extends ChainObjective {
     }
 
     @Override
-    @SneakyThrows
-    public void run() {
-        consumer.accept(compressEnv());
-        finish(null);
+    public void run(CompletableFuture<Object> future, Environment env) {
+        consumer.accept(env.resolve(envAddrs));
+        future.complete(0);
     }
 }

@@ -1,27 +1,29 @@
 package me.helight.ccom.concurrency;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.SneakyThrows;
 import me.helight.ccom.concurrency.chain.ChainObjective;
+import me.helight.ccom.concurrency.chain.ChainResult;
 import me.helight.ccom.concurrency.chain.EnvAdrr;
 import me.helight.ccom.concurrency.chain.objectives.*;
 
+import java.io.Serializable;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class Chain {
+public class Chain implements Cloneable, Serializable {
 
+    @Setter(AccessLevel.PRIVATE)
     private List<ChainObjective> objectives = Collections.synchronizedList(new ArrayList<>());
 
-    public Object[] environment;
-
     @Getter
-    private Map<String,Object> namedEnvironment = new ConcurrentHashMap<String,Object>();
+    @Setter
+    private Map<String,Object> namedEnvironment = new ConcurrentHashMap<>();
 
     public Chain parent;
 
@@ -79,32 +81,29 @@ public class Chain {
         return this;
     }
 
-    public long run(Map<String,Object> initEnvironment) {
-        if (initEnvironment != null) {
-            namedEnvironment.putAll(initEnvironment);
-        }
-
-        environment = new Object[objectives.size()];
+    @SneakyThrows
+    public ChainResult run(Environment env) {
         long timestamp = System.currentTimeMillis();
 
-        for (int i = 0; i < objectives.size(); i++) {
-            ChainObjective chainObjective = objectives.get(i);
-            chainObjective.exec(this);
-            try {
-                environment[i] = chainObjective.getFuture().get();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
+        for (ChainObjective chainObjective  : objectives) {
+            CountDownLatch blocker = new CountDownLatch(1);
+            new Thread(() -> {
+                chainObjective.exec(env);
+                blocker.countDown();
+            }).start();
+            chainObjective.exec(env);
+            blocker.await(10, TimeUnit.SECONDS);
         }
 
-        return System.currentTimeMillis() - timestamp;
+        long duration = System.currentTimeMillis() - timestamp;
+        return new ChainResult(duration,env);
     }
 
-    public Future<Long> runAsync(Map<String,Object> initEnvironment) {
-        CompletableFuture<Long> future = new CompletableFuture<>();
+    public Future<ChainResult> runAsync(Environment env) {
+        CompletableFuture<ChainResult> future = new CompletableFuture<>();
 
         new Thread(() -> {
-            future.complete(run(initEnvironment));
+            future.complete(run(env));
         }).start();
 
         return future;
@@ -113,6 +112,5 @@ public class Chain {
     public static Chain create() {
         return new Chain();
     }
-
 
 }

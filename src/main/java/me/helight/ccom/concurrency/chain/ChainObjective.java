@@ -1,54 +1,44 @@
 package me.helight.ccom.concurrency.chain;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import me.helight.ccom.concurrency.Chain;
+import me.helight.ccom.concurrency.Environment;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
-public abstract class ChainObjective {
+public abstract class ChainObjective implements Cloneable, Serializable {
 
     public Chain chain;
 
     protected EnvAdrr[] envAddrs;
 
-    private String exportEnv = null;
+    private EnvAdrr exportEnv = null;
 
-    @Getter
-    private CompletableFuture<Object> future = new CompletableFuture<>();
-
-    protected Object compressEnv() {
-        if (envAddrs.length == 1 ) {
-            return envAddrs[0].resolve(chain);
-        } else {
-            ArrayList<Object> arrayList = new ArrayList<>();
-            for (EnvAdrr addr : envAddrs) {
-                arrayList.add(addr.resolve(chain));
-            }
-            return arrayList;
-        }
-    }
-
-    protected final void finish(Object object) {
-        if (exportEnv != null) {
-            EnvAdrr.getHighestChain(chain).getNamedEnvironment().put(exportEnv, object);
-        }
-
-        future.complete(object);
-    }
-
-    protected abstract void run();
+    public abstract void run(CompletableFuture<Object> future, Environment env);
 
     public final ChainObjective exportNamed(String key) {
-        exportEnv = key;
+        exportEnv = EnvAdrr.from(key);
         return this;
     }
 
-    public final void exec(Chain chain) {
-        this.chain = chain;
-        run();
+    public final ChainObjective exportNamed(EnvAdrr addr) {
+        exportEnv = addr;
+        return this;
     }
 
+    @SneakyThrows
+    public final void exec(Environment environment) {
+        ChainObjective chainObjective = (ChainObjective) clone();
+        chainObjective.chain = chain;
+        CompletableFuture<Object> future = new CompletableFuture<>();
+        chainObjective.run(future, environment);
+        Object object = future.get();
+
+        if (exportEnv != null) {
+            exportEnv.set(environment, object);
+        }
+    }
 }

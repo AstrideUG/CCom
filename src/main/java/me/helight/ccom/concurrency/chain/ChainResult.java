@@ -1,13 +1,14 @@
 package me.helight.ccom.concurrency.chain;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import me.helight.ccom.concurrency.Environment;
 
-import java.util.Map;
-
-@Data
+@Getter
+@AllArgsConstructor
 public class ChainResult {
 
-    long duration;
-    Map<String, Object> environment;
+    private long duration;
+    private Environment environment;
 
 }

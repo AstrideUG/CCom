@@ -1,10 +1,11 @@
 package me.helight.ccom.concurrency.chain.objectives;
 
-import lombok.SneakyThrows;
 import me.helight.ccom.concurrency.Chain;
+import me.helight.ccom.concurrency.Environment;
 import me.helight.ccom.concurrency.chain.ChainObjective;
 
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 
 public class ParallelObjective extends ChainObjective {
@@ -16,24 +17,27 @@ public class ParallelObjective extends ChainObjective {
     }
 
     @Override
-    @SneakyThrows
-    public void run() {
-        Object[][] returns = new Object[chains.length][];
+    public Object clone() throws CloneNotSupportedException {
+        ParallelObjective chainObjective = (ParallelObjective) super.clone();
+        chainObjective.chains=Arrays.copyOf(chains, chains.length);
+        return chainObjective;
+    }
+
+    @Override
+    public void run(CompletableFuture<Object> future, Environment env) {
         CountDownLatch latch = new CountDownLatch(chains.length);
         for (int i = 0; i < chains.length; i++) {
             int finalI = i;
             new Thread(() -> {
-                Chain c = chains[finalI];
-                c.parent = chain;
-                c.run(new HashMap<>());
-                returns[finalI] = c.environment;
+                Chain c = (Chain) chains[finalI];
+                c.run(env);
                 latch.countDown();
             }).start();
         }
 
         try {
             latch.await();
-            finish(returns);
+            future.complete(0);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

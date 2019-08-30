@@ -2,10 +2,10 @@ package me.helight.ccom.concurrency.chain.objectives;
 
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
+import me.helight.ccom.concurrency.Environment;
 import me.helight.ccom.concurrency.chain.ChainObjective;
 
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CompletableFuture;
 
 @AllArgsConstructor
 public class SleepObjective extends ChainObjective {
@@ -14,8 +14,8 @@ public class SleepObjective extends ChainObjective {
 
     @Override
     @SneakyThrows
-    public void run() {
+    public void run(CompletableFuture<Object> future, Environment env) {
         Thread.sleep(sleep);
-        finish(sleep);
+        future.complete(0);
     }
 }
