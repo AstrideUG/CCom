@@ -1,6 +1,7 @@
 package me.helight.ccom.concurrency.chain;
 
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import me.helight.ccom.concurrency.Chain;
 import me.helight.ccom.concurrency.Environment;
@@ -13,6 +14,7 @@ public abstract class ChainObjective implements Cloneable, Serializable {
 
     public Chain chain;
 
+    @Setter
     protected EnvAdrr[] envAddrs;
 
     private EnvAdrr exportEnv = null;

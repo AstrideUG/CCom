@@ -28,11 +28,10 @@ class ChainTest {
 
         Environment map = new Environment();
         map.put("mult", yRandom);
-        map.put("org", xRandom);
 
         ChainResult result = Chain.create()
                 .sleep(50)
-                .addObjective(new SupplierObjective(() -> xRandom))
+                .addObjective(new SupplierObjective(() -> xRandom)).export(EnvAdrr.from("org"))
                 .addObjective(new FunctionObjective(a -> (int)((List)a).get(0) * (int)((List)a).get(1), EnvAdrr.from("org"), EnvAdrr.from("mult")).exportNamed("result"))
                 .sleep(50)
                 .addObjective(new RunnableObjective(() -> {
@@ -40,6 +39,7 @@ class ChainTest {
                 }))
                 .addObjective(new ConsumerObjective(x -> assertEquals(xRandom, x), EnvAdrr.from("org")))
                 .addObjective(new ConsumerObjective(x -> assertEquals(xRandom * yRandom, (int)x), EnvAdrr.from("result")))
+                .consume(x -> assertEquals(xRandom, x), Integer.class).adresses(EnvAdrr.from("org"))
                 .run(map);
 
         assertTrue(runnableCalled.get());

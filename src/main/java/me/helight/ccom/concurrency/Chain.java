@@ -45,6 +45,18 @@ public class Chain implements Cloneable, Serializable {
         return this;
     }
 
+    public Chain export(EnvAdrr envAdrr) {
+        int i = objectives.size() - 1;
+        objectives.get(i).exportNamed(envAdrr);
+        return this;
+    }
+
+    public Chain adresses(EnvAdrr... addr) {
+        int i = objectives.size() - 1;
+        objectives.get(i).setEnvAddrs(addr);
+        return this;
+    }
+
     public Chain supply(Supplier supplier) {
         objectives.add(new SupplierObjective(supplier));
         return this;
@@ -65,8 +77,18 @@ public class Chain implements Cloneable, Serializable {
         return this;
     }
 
+    public <K> Chain consume(Consumer<K> consumer, Class<K> clazz) {
+        objectives.add(new ConsumerObjective(consumer));
+        return this;
+    }
+
     public Chain function(Function function, EnvAdrr... environmentAdresses) {
         objectives.add(new FunctionObjective(function,environmentAdresses));
+        return this;
+    }
+
+    public <K,V> Chain function(Function<K,V> function, Class<K> clazz) {
+        objectives.add(new FunctionObjective(function));
         return this;
     }
 
