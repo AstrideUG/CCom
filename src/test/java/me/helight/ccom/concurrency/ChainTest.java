@@ -8,6 +8,7 @@ import me.helight.ccom.concurrency.chain.objectives.SupplierObjective;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -18,9 +19,13 @@ class ChainTest {
     @Test
     void test() {
         AtomicBoolean runnableCalled = new AtomicBoolean(false);
+
+        HashMap<String,Object> map = new HashMap<>();
+        map.put("mult", 10);
+
         long duration = Chain.create()
                 .sleep(50)
-                .addObjective(new SupplierObjective(() -> 10).exportNamed("mult"))
+                .addObjective(new SupplierObjective(() -> 10))
                 .addObjective(new FunctionObjective(a -> (int)((List)a).get(0) * (int)((List)a).get(1), EnvAdrr.from(1), EnvAdrr.from("mult")))
                 .sleep(50)
                 .addObjective(new RunnableObjective(() -> {
@@ -28,7 +33,7 @@ class ChainTest {
                 }))
                 .addObjective(new ConsumerObjective(x -> assertEquals(10, x), EnvAdrr.from(1)))
                 .addObjective(new ConsumerObjective(x -> assertEquals(100, (int)x), EnvAdrr.from(2)))
-                .run();
+                .run(map);
 
         assertTrue(runnableCalled.get());
         assertTrue(duration >= 100);
@@ -50,7 +55,7 @@ class ChainTest {
             }
             return 50;
         }).exportNamed("val"));
-        supplyChain.run();
+        supplyChain.run(new HashMap<>());
         assertEquals(supplyChain.environment[0], 50);
         Chain.create()
                 .parallel(supplyChain)
@@ -61,7 +66,7 @@ class ChainTest {
                     Object[][] env = (Object[][]) a;
                     assertEquals(50, env[0][0]);
                     assertEquals(50, c);
-                }, EnvAdrr.from(0), EnvAdrr.from("val")).run();
+                }, EnvAdrr.from(0), EnvAdrr.from("val")).run(new HashMap<>());
 
     }
 

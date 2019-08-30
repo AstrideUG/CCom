@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import me.helight.ccom.concurrency.Chain;
 import me.helight.ccom.concurrency.chain.ChainObjective;
 
+import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 
 public class ParallelObjective extends ChainObjective {
@@ -24,7 +25,7 @@ public class ParallelObjective extends ChainObjective {
             new Thread(() -> {
                 Chain c = chains[finalI];
                 c.parent = chain;
-                c.run();
+                c.run(new HashMap<>());
                 returns[finalI] = c.environment;
                 latch.countDown();
             }).start();

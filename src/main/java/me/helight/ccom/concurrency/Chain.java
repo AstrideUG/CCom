@@ -5,10 +5,7 @@ import me.helight.ccom.concurrency.chain.ChainObjective;
 import me.helight.ccom.concurrency.chain.EnvAdrr;
 import me.helight.ccom.concurrency.chain.objectives.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -82,7 +79,11 @@ public class Chain {
         return this;
     }
 
-    public long run() {
+    public long run(Map<String,Object> initEnvironment) {
+        if (initEnvironment != null) {
+            namedEnvironment.putAll(initEnvironment);
+        }
+
         environment = new Object[objectives.size()];
         long timestamp = System.currentTimeMillis();
 
@@ -99,11 +100,11 @@ public class Chain {
         return System.currentTimeMillis() - timestamp;
     }
 
-    public Future<Long> runAsync() {
+    public Future<Long> runAsync(Map<String,Object> initEnvironment) {
         CompletableFuture<Long> future = new CompletableFuture<>();
 
         new Thread(() -> {
-            future.complete(run());
+            future.complete(run(initEnvironment));
         }).start();
 
         return future;

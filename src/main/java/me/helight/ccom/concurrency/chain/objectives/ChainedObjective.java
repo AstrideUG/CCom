@@ -4,8 +4,7 @@ import lombok.AllArgsConstructor;
 import me.helight.ccom.concurrency.Chain;
 import me.helight.ccom.concurrency.chain.ChainObjective;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 
 @AllArgsConstructor
 public class ChainedObjective extends ChainObjective {
@@ -14,7 +13,7 @@ public class ChainedObjective extends ChainObjective {
 
     @Override
     public void run() {
-        c.run();
+        c.run(new HashMap<>());
         finish(c.environment);
     }
 }
