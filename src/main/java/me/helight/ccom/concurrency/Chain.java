@@ -113,7 +113,6 @@ public class Chain implements Cloneable, Serializable {
                 chainObjective.exec(env);
                 blocker.countDown();
             }).start();
-            chainObjective.exec(env);
             blocker.await(10, TimeUnit.SECONDS);
         }
 

@@ -14,6 +14,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,11 +30,14 @@ class ChainTest {
         Environment map = new Environment();
         map.put("mult", yRandom);
 
+        AtomicInteger integer = new AtomicInteger(0);
+
         ChainResult result = Chain.create()
-                .sleep(50)
+                .sleep(20)
+                .runnable(integer::getAndIncrement)
                 .addObjective(new SupplierObjective(() -> xRandom)).export(EnvAdrr.from("org"))
                 .addObjective(new FunctionObjective(a -> (int)((List)a).get(0) * (int)((List)a).get(1), EnvAdrr.from("org"), EnvAdrr.from("mult")).exportNamed("result"))
-                .sleep(50)
+                .sleep(20)
                 .addObjective(new RunnableObjective(() -> {
                     runnableCalled.set(true);
                 }))
@@ -43,7 +47,8 @@ class ChainTest {
                 .run(map);
 
         assertTrue(runnableCalled.get());
-        assertTrue(result.getDuration() >= 100);
+        assertTrue(result.getDuration() >= 40);
+        assertEquals(1, integer.get());
     }
 
     @Test
@@ -68,7 +73,6 @@ class ChainTest {
                     Environment env = new Environment();
                     int org = ThreadLocalRandom.current().nextInt();
                     int mult = ThreadLocalRandom.current().nextInt();
-                    System.out.println("Numbers are: " + org + "," + mult);
                     env.put("origin", org);
                     env.put("mult", mult);
                     env.put("#" + ThreadLocalRandom.current().nextInt(), ThreadLocalRandom.current().nextInt());
@@ -76,7 +80,6 @@ class ChainTest {
                     ChainResult chainResult = chain.runAsync(env).get();
                     assertEquals(org * mult, chainResult.getEnvironment().get("result"));
                     assertEquals(5, chainResult.getEnvironment().size());
-                    System.out.println("Assert successful");
                     countDownLatch.countDown();
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
