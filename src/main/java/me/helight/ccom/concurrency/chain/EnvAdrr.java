@@ -10,6 +10,11 @@ public class EnvAdrr {
     private String value;
 
     public Object resolve(Map<String,Object> environment) {
+
+        if (value.equalsIgnoreCase("env") || value.equalsIgnoreCase("environment")) {
+            return environment;
+        }
+
         return environment.getOrDefault(value, null);
     }
 
