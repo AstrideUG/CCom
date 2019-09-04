@@ -9,7 +9,6 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.Updates;
-import lombok.Getter;
 import me.helight.ccom.config.defaults.SimpleMongoConfig;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -19,7 +18,6 @@ import org.bson.conversions.Bson;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
-@Getter
 public class MongoConnector {
 
     private MongoClient mongoClient;
@@ -92,5 +90,13 @@ public class MongoConnector {
 
     public static MongoConnector dispenseWithoutPojos(SimpleMongoConfig config) {
         return new MongoConnector(config, false);
+    }
+
+    public MongoClient getMongoClient() {
+        return this.mongoClient;
+    }
+
+    public MongoDatabase getMongoDatabase() {
+        return this.mongoDatabase;
     }
 }

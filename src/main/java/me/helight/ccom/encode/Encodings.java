@@ -1,7 +1,6 @@
 package me.helight.ccom.encode;
 
 import com.google.gson.Gson;
-import lombok.AllArgsConstructor;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.io.*;
@@ -9,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.function.Function;
 
-@AllArgsConstructor
 public enum Encodings {
 
     HEX(Hex::toHexString, Hex::decode),
@@ -21,6 +19,11 @@ public enum Encodings {
 
     private Function<byte[], String> encoder;
     private Function<String, byte[]> decoder;
+
+    private Encodings(Function<byte[], String> encoder, Function<String, byte[]> decoder) {
+        this.encoder = encoder;
+        this.decoder = decoder;
+    }
 
     public String encode(byte[] bytes) {
         return encoder.apply(bytes);

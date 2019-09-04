@@ -2,25 +2,28 @@ package me.helight.ccom.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import lombok.*;
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.SneakyThrows;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 
-@RequiredArgsConstructor
 public class Config<T> {
 
     @NonNull
-    @Getter
     private File location;
 
     @NonNull
-    @Getter
     private Class<T> clazz;
 
-    @Getter
     private T defaultValue;
+
+    public Config(File location, Class<T> clazz) {
+        this.location = location;
+        this.clazz = clazz;
+    }
 
     /**
      * Sets the Config-Default
@@ -69,4 +72,17 @@ public class Config<T> {
         return new Config<K>(new File(filename), kClass);
     }
 
+    @NonNull
+    public File getLocation() {
+        return this.location;
+    }
+
+    @NonNull
+    public Class<T> getClazz() {
+        return this.clazz;
+    }
+
+    public T getDefaultValue() {
+        return this.defaultValue;
+    }
 }

@@ -1,8 +1,5 @@
 package me.helight.ccom.concurrency;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.SneakyThrows;
 import me.helight.ccom.concurrency.chain.ChainObjective;
 import me.helight.ccom.concurrency.chain.ChainResult;
@@ -20,11 +17,8 @@ import java.util.function.Supplier;
 
 public class Chain {
 
-    @Setter(AccessLevel.PRIVATE)
     private List<ChainObjective> objectives = Collections.synchronizedList(new ArrayList<>());
 
-    @Getter
-    @Setter
     private Map<String,Object> namedEnvironment = new ConcurrentHashMap<>();
 
     public Chain addObjective(ChainObjective objective) {
@@ -134,4 +128,15 @@ public class Chain {
         return new Chain();
     }
 
+    public Map<String, Object> getNamedEnvironment() {
+        return this.namedEnvironment;
+    }
+
+    private void setObjectives(List<ChainObjective> objectives) {
+        this.objectives = objectives;
+    }
+
+    public void setNamedEnvironment(Map<String, Object> namedEnvironment) {
+        this.namedEnvironment = namedEnvironment;
+    }
 }

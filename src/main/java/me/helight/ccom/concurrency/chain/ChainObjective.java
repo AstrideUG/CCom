@@ -1,7 +1,5 @@
 package me.helight.ccom.concurrency.chain;
 
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.SneakyThrows;
 import me.helight.ccom.concurrency.Chain;
 import me.helight.ccom.concurrency.Environment;
@@ -9,15 +7,16 @@ import me.helight.ccom.concurrency.Environment;
 import java.io.Serializable;
 import java.util.concurrent.CompletableFuture;
 
-@RequiredArgsConstructor
 public abstract class ChainObjective implements Cloneable, Serializable {
 
     public Chain chain;
 
-    @Setter
     protected EnvAdrr[] envAddrs;
 
     private EnvAdrr exportEnv = null;
+
+    public ChainObjective() {
+    }
 
     public abstract void run(CompletableFuture<Object> future, Environment env);
 
@@ -42,5 +41,9 @@ public abstract class ChainObjective implements Cloneable, Serializable {
         if (exportEnv != null) {
             exportEnv.set(environment, object);
         }
+    }
+
+    public void setEnvAddrs(EnvAdrr[] envAddrs) {
+        this.envAddrs = envAddrs;
     }
 }
