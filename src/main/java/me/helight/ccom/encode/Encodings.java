@@ -33,36 +33,19 @@ public enum Encodings {
         return decoder.apply(string);
     }
 
-    /**
-     * Encodes a UTF-8 String
-     * @param string
-     */
     public String encodeUTF8(String string) {
         return encode(string.getBytes(StandardCharsets.UTF_8));
     }
 
-    /**
-     * Decodes to a UTF-8 String
-     * @param string
-     */
     public String decodeUTF8(String string) {
         return new String(decode(string), StandardCharsets.UTF_8);
     }
 
-    /**
-     * Encode a Pojo using {@link Gson}
-     * @param pojo
-     */
     public <K> String encodePojo(K pojo) {
         Gson gson = new Gson();
         return encodeUTF8(gson.toJson(pojo, pojo.getClass()));
     }
 
-    /**
-     * Decode a Pojo using {@link Gson}
-     * @param clazz
-     * @param string
-     */
     public <K> K decodePojo(String string, Class<K> clazz) {
         Gson gson = new Gson();
         return gson.fromJson(decodeUTF8(string), clazz);

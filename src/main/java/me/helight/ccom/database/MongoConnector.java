@@ -52,42 +52,20 @@ public class MongoConnector {
         }
     }
 
-    /**
-     * @param selector The selector to find the Document
-     * @param value
-     * @param collection
-     * @param key
-     */
     public <K,V> void docSet(MongoCollection<K> collection, Bson selector, String key, V value) {
         collection.updateMany(selector, Updates.set(key, value));
     }
 
-    /**
-     * @param selector The selector to find the Document
-     * @param collection
-     * @param key
-     */
     public <K> void docRem(MongoCollection<K> collection, Bson selector, String key) {
         collection.updateMany(selector, Updates.unset(key));
     }
 
-    /**
-     * @param selector The selector to find the Document
-     * @param collection
-     * @param key
-     */
     @SuppressWarnings("unchecked")
     public <K,V> V docGet(MongoCollection<K> collection, Bson selector, String key) {
         Document document = collection.find(selector, Document.class).projection(Projections.include(key)).first();
         return document == null ? null : (V) document.get(key);
     }
 
-    /**
-     * @param selector The selector to find the Document
-     * @param key The key to look for in the Document
-     * @param collection
-     * @return Whether there is a document match the selector and containing the key
-     */
     public <K> boolean docExists(MongoCollection<K> collection, Bson selector, String key) {
         return collection.countDocuments(Filters.and(selector, Filters.exists(key))) > 0;
     }

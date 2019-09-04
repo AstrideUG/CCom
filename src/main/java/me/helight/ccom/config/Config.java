@@ -25,10 +25,7 @@ public class Config<T> {
         this.clazz = clazz;
     }
 
-    /**
-     * Sets the Config-Default
-     * @param value
-     */
+
     public void setDefault(T value) {
         defaultValue = value;
     }
@@ -51,13 +48,6 @@ public class Config<T> {
         }
     }
 
-    /**
-     * Constructs a ConfigObject for a File in a subfolder
-     *
-     * @param kClass The class of the ConfigPojo
-     * @param filename
-     * @param subfolder
-     */
     public static <K> Config<K> inSubfolder(String subfolder, String filename, Class<K> kClass) {
         File sub = new File(subfolder);
 
@@ -66,12 +56,6 @@ public class Config<T> {
         return new Config<K>(new File(sub, filename), kClass);
     }
 
-    /**
-     * Constructs a ConfigObject for a File in the current folder
-     *
-     * @param kClass The class of the ConfigPojo
-     * @param filename
-     */
     public static <K> Config<K> inCurrent(String filename, Class<K> kClass) {
         return new Config<K>(new File(filename), kClass);
     }
