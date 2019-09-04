@@ -28,6 +28,7 @@ public class Chain {
 
     /**
      * Shortcut for adding a {@link SleepObjective} to the ChainCall
+     * @param millis
      */
     public Chain sleep(long millis) {
         objectives.add(new SleepObjective(millis));

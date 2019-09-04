@@ -35,6 +35,7 @@ public enum Encodings {
 
     /**
      * Encodes a UTF-8 String
+     * @param string
      */
     public String encodeUTF8(String string) {
         return encode(string.getBytes(StandardCharsets.UTF_8));
@@ -42,6 +43,7 @@ public enum Encodings {
 
     /**
      * Decodes to a UTF-8 String
+     * @param string
      */
     public String decodeUTF8(String string) {
         return new String(decode(string), StandardCharsets.UTF_8);
@@ -49,6 +51,7 @@ public enum Encodings {
 
     /**
      * Encode a Pojo using {@link Gson}
+     * @param pojo
      */
     public <K> String encodePojo(K pojo) {
         Gson gson = new Gson();
@@ -57,6 +60,8 @@ public enum Encodings {
 
     /**
      * Decode a Pojo using {@link Gson}
+     * @param clazz
+     * @param string
      */
     public <K> K decodePojo(String string, Class<K> clazz) {
         Gson gson = new Gson();
