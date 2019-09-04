@@ -9,14 +9,16 @@ import me.helight.ccom.concurrency.chain.ChainResult;
 import me.helight.ccom.concurrency.chain.EnvAdrr;
 import me.helight.ccom.concurrency.chain.objectives.*;
 
-import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class Chain implements Cloneable, Serializable {
+public class Chain {
 
     @Setter(AccessLevel.PRIVATE)
     private List<ChainObjective> objectives = Collections.synchronizedList(new ArrayList<>());
@@ -24,8 +26,6 @@ public class Chain implements Cloneable, Serializable {
     @Getter
     @Setter
     private Map<String,Object> namedEnvironment = new ConcurrentHashMap<>();
-
-    public Chain parent;
 
     public Chain addObjective(ChainObjective objective) {
         objectives.add(objective);
